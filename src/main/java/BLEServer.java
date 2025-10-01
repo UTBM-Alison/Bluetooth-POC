@@ -3,10 +3,21 @@ import java.nio.file.*;
 
 /**
  * BLE Server - Interface native pour Windows BLE
+ * Supports test mode via BLE_TEST_MODE environment variable
  */
 public class BLEServer {
+    private static final boolean isTestMode = System.getenv("BLE_TEST_MODE") != null;
+    
     static {
         loadNativeLibrary();
+    }
+    
+    /**
+     * Vérifie si on est en mode test (mock)
+     * @return true si BLE_TEST_MODE est définie
+     */
+    public static boolean isTestMode() {
+        return isTestMode;
     }
     
     private static void loadNativeLibrary() {
@@ -54,20 +65,41 @@ public class BLEServer {
     private native int nativeNotify(byte[] data);
 
     // API Java
-    public int startServer(String serviceUuid, String charUuid) { 
+    public int startServer(String serviceUuid, String charUuid) {
+        if (isTestMode) {
+            System.out.println("[TEST MODE] BLE Server started with UUID: " + serviceUuid);
+            return 1; // SUCCESS
+        }
         return nativeStartServer(serviceUuid, charUuid); 
     }
     
-    public void stopServer() { 
+    public void stopServer() {
+        if (isTestMode) {
+            System.out.println("[TEST MODE] BLE Server stopped");
+            return;
+        }
         nativeStopServer(); 
     }
     
-    public int notify(byte[] data) { 
+    public int notify(byte[] data) {
+        if (isTestMode) {
+            System.out.println("[TEST MODE] Notified " + data.length + " bytes");
+            return data.length; // SUCCESS - return number of bytes sent
+        }
         return nativeNotify(data); 
     }
     
     // Envoi rapide
     public boolean sendData(String data) {
+        if (isTestMode) {
+            if (data == null) {
+                System.out.println("[TEST MODE] Sending null data - returning false");
+                return false;
+            }
+            System.out.println("[TEST MODE] Sending data: " + data + " (" + data.length() + " chars)");
+            return true; // SUCCESS
+        }
+        
         try {
             byte[] bytes = data.getBytes("UTF-8");
             

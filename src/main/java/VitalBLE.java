@@ -49,7 +49,12 @@ public class VitalBLE {
     private static void start() {
         if (!isStarted) {
             int result = server.startServer(serviceUuid, charUuid);
-            isStarted = (result == 0);
+            // En mode test: 1 = succès, en mode réel: 0 = succès
+            if (BLEServer.isTestMode()) {
+                isStarted = (result == 1);
+            } else {
+                isStarted = (result == 0);
+            }
         }
     }
     
@@ -70,5 +75,15 @@ public class VitalBLE {
             server.stopServer();
             isStarted = false;
         }
+    }
+    
+    /**
+     * Réinitialiser complètement VitalBLE (pour les tests)
+     */
+    public static void reset() {
+        shutdown();
+        // Restaurer les UUIDs par défaut
+        serviceUuid = "0000180D-0000-1000-8000-00805F9B34FB";
+        charUuid = "00002A37-0000-1000-8000-00805F9B34FB";
     }
 }

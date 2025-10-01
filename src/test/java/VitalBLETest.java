@@ -7,18 +7,18 @@ import static org.assertj.core.api.Assertions.*;
 /**
  * Tests JUnit 5 modernes pour VitalBLE avec JaCoCo
  */
-class VitalBLETest {
+public class VitalBLETest {
     
     @BeforeEach
     void setUp() {
         // S'assurer d'un état propre avant chaque test
-        VitalBLE.shutdown();
+        VitalBLE.reset();
     }
     
     @AfterEach 
     void tearDown() {
         // Nettoyer après chaque test
-        VitalBLE.shutdown();
+        VitalBLE.reset();
     }
     
     @Test

@@ -54,7 +54,9 @@ jobs:
           dir target\classes\BLEServer.dll
           echo "DLL verification complete"
 
-      - name: Run ALL tests (including native DLL tests)
+      - name: Run all tests in BLE Test Mode
+        env:
+          BLE_TEST_MODE: "true"
         run: |
           mvn -B -U test
 

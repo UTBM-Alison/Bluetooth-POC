@@ -6,7 +6,7 @@ import static org.assertj.core.api.Assertions.*;
  * Tests de configuration VitalBLE sans dépendances natives
  * Ces tests valident la logique de configuration sans appeler la DLL
  */
-class VitalBLEConfigTest {
+public class VitalBLEConfigTest {
 
     @Test
     @DisplayName("Should validate Heart Rate Service UUID format")

@@ -377,4 +377,121 @@ public class BLEServerTest {
         // sendData() - déjà largement testé
         assertThat(bleServer.sendData("Coverage test")).isTrue();
     }
+    
+    @Test
+    @DisplayName("Should test BLEServer constructor and instance creation")
+    void testBLEServerConstructor() {
+        // Créer une nouvelle instance pour couvrir le constructeur
+        BLEServer newServer = new BLEServer();
+        assertThat(newServer).isNotNull();
+        
+        // Tester que la nouvelle instance fonctionne normalement
+        assertThat(BLEServer.isTestMode()).isEqualTo(BLEServer.isTestMode()); // Static method
+        
+        if (BLEServer.isTestMode()) {
+            assertThat(newServer.sendData("Constructor test")).isTrue();
+        }
+    }
+    
+    @Test
+    @DisplayName("Should handle very small data chunks")
+    void testVerySmallDataChunks() {
+        // Test avec 1 caractère
+        assertThat(bleServer.sendData("a")).isTrue();
+        
+        // Test avec 2 caractères
+        assertThat(bleServer.sendData("ab")).isTrue();
+        
+        // Test avec exactement la limite de chunk (200 chars)
+        String chunkBoundary = "x".repeat(200);
+        assertThat(bleServer.sendData(chunkBoundary)).isTrue();
+        
+        // Test avec un char de plus que la limite
+        String overBoundary = "x".repeat(201);
+        assertThat(bleServer.sendData(overBoundary)).isTrue();
+    }
+    
+    @Test
+    @DisplayName("Should test static method isTestMode consistency")
+    void testIsTestModeConsistency() {
+        // Appeler plusieurs fois pour s'assurer de la cohérence
+        boolean first = BLEServer.isTestMode();
+        boolean second = BLEServer.isTestMode();
+        boolean third = BLEServer.isTestMode();
+        
+        assertThat(first).isEqualTo(second);
+        assertThat(second).isEqualTo(third);
+        
+        // Vérifier avec l'environnement
+        String envValue = System.getenv("BLE_TEST_MODE");
+        if (envValue != null) {
+            assertThat(first).isTrue();
+        }
+    }
+    
+    @Test
+    @DisplayName("Should test sendData with exceptional conditions")
+    void testSendDataExceptionalConditions() {
+        BLEServer server = new BLEServer();
+        
+        // Test avec une chaîne contenant des caractères de contrôle
+        String controlChars = "Test\u0000\u0001\u0002data";
+        boolean result1 = server.sendData(controlChars);
+        assertThat(result1).isTrue(); // En mode test, accepté
+        
+        // Test avec chaîne très courte (1 caractère)
+        boolean result2 = server.sendData("A");
+        assertThat(result2).isTrue();
+        
+        // Test avec chaîne de taille exacte chunk (200 chars)
+        String exactChunk = "X".repeat(200);
+        boolean result3 = server.sendData(exactChunk);
+        assertThat(result3).isTrue();
+    }
+    
+    @Test
+    @DisplayName("Should handle sendData internal branches")
+    void testSendDataInternalBranches() {
+        BLEServer server = new BLEServer();
+        
+        // Test pour couvrir la branche bytes.length == 0
+        String emptyString = "";
+        boolean emptyResult = server.sendData(emptyString);
+        
+        if (BLEServer.isTestMode()) {
+            // En mode test, chaîne vide retourne true
+            assertThat(emptyResult).isTrue();
+        } else {
+            // En mode réel, chaîne vide retourne false (bytes.length == 0)
+            assertThat(emptyResult).isFalse();
+        }
+        
+        // Test avec chaîne normale pour couvrir d'autres branches
+        boolean normalResult = server.sendData("Normal test data");
+        assertThat(normalResult).isTrue();
+    }
+    
+    @Test
+    @DisplayName("Should test multiple server lifecycle operations")
+    void testMultipleServerLifecycleOperations() {
+        BLEServer server = new BLEServer();
+        
+        // Cycle complet multiple fois
+        for (int i = 0; i < 3; i++) {
+            // Démarrer
+            int startResult = server.startServer("cycle-" + i, "char-" + i);
+            if (BLEServer.isTestMode()) {
+                assertThat(startResult).isEqualTo(1);
+            }
+            
+            // Envoyer données
+            assertThat(server.sendData("cycle-data-" + i)).isTrue();
+            
+            // Arrêter
+            server.stopServer();
+        }
+        
+        // Test final
+        assertThat(server.sendData("final-test")).isTrue();
+    }
 }

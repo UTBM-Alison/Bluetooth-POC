@@ -1,6 +1,7 @@
 # VitalBLE - Ultra-Fast Bluetooth LE Library
 
 [![Tests et Coverage](https://github.com/UTBM-Alison/Bluetooth-POC/actions/workflows/test.yml/badge.svg)](https://github.com/UTBM-Alison/Bluetooth-POC/actions/workflows/test.yml)
+[![codecov](https://codecov.io/github/UTBM-Alison/Bluetooth-POC/graph/badge.svg?token=P6OeEmtMbi)](https://codecov.io/github/UTBM-Alison/Bluetooth-POC)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 ## 🚀 Performance Breakthrough
@@ -159,8 +160,9 @@ vital-ble/
 
 ## 📈 Code Coverage
 
-Rapport local disponible après `mvn test` :
-- **HTML Report**: `target/site/jacoco/index.html`
+Suivi de la couverture de code :
+- **Codecov**: https://codecov.io/gh/UTBM-Alison/Bluetooth-POC
+- **HTML Report local**: `target/site/jacoco/index.html`
 - **XML Report**: `target/site/jacoco/jacoco.xml`
 
 ## 📄 License

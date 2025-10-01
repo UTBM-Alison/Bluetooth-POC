@@ -1,3 +1,5 @@
+package main.java;
+
 /**
  * Vital BLE - Ultra simple avec UUIDs configurables
  */

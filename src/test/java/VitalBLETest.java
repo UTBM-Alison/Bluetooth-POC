@@ -5,6 +5,8 @@ import org.junit.jupiter.api.AfterEach;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import org.mockito.MockedStatic;
+import main.java.VitalBLE;
+import main.java.BLEServer;
 
 /**
  * Tests JUnit 5 modernes pour VitalBLE avec JaCoCo

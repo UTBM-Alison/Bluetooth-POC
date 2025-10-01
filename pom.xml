@@ -91,7 +91,9 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>3.1.2</version>
                 <configuration>
-                    <argLine>--enable-native-access=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED</argLine>
+                    <!-- Ne pas écraser l'argLine de JaCoCo, utiliser @{argLine} pour la concaténation -->
+                    <argLine>@{argLine} --enable-native-access=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED</argLine>
+                    <!-- Ajouter les classes compilées dans target/classes/main/java au classpath -->
                     <additionalClasspathElements>
                         <additionalClasspathElement>${project.build.directory}/classes/main/java</additionalClasspathElement>
                     </additionalClasspathElements>

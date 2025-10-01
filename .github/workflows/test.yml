@@ -47,9 +47,16 @@ jobs:
         run: |
           mvn -B -U clean compile test-compile
 
-      - name: Run configuration tests (no native DLL required)
+      - name: Verify DLL is available
         run: |
-          mvn -B -U test -Dtest=VitalBLEConfigTest
+          echo "Checking for BLEServer.dll..."
+          dir resources\BLEServer.dll
+          dir target\classes\BLEServer.dll
+          echo "DLL verification complete"
+
+      - name: Run ALL tests (including native DLL tests)
+        run: |
+          mvn -B -U test
 
       - name: Generate JaCoCo coverage report
         run: |

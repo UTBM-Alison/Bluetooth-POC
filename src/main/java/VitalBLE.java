@@ -5,8 +5,19 @@ package main.java;
  */
 public class VitalBLE {
     
-    private static BLEServer server = new BLEServer();
+    private static BLEServerInterface server = new BLEServer();
     private static boolean isStarted = false;
+    
+    /**
+     * Set custom BLE server implementation (mainly for testing)
+     * @param serverImplementation Custom server implementation
+     */
+    public static void setServer(BLEServerInterface serverImplementation) {
+        if (isStarted) {
+            throw new IllegalStateException("Cannot change server implementation after server is started");
+        }
+        server = serverImplementation;
+    }
     
     // UUIDs par défaut (Heart Rate Service)
     private static String serviceUuid = "0000180D-0000-1000-8000-00805F9B34FB";
@@ -49,14 +60,10 @@ public class VitalBLE {
      * Démarrer serveur BLE avec les UUIDs configurés
      */
     private static void start() {
-        if (!isStarted) {
+        if (!isStarted && server != null) {
             int result = server.startServer(serviceUuid, charUuid);
-            // En mode test: 1 = succès, en mode réel: 0 = succès
-            if (BLEServer.isTestMode()) {
-                isStarted = (result == 1);
-            } else {
-                isStarted = (result == 0);
-            }
+            // Convention: 1 = succès pour toutes les implémentations
+            isStarted = (result == 1);
         }
     }
     

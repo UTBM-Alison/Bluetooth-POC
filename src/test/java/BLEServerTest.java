@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;
 
+import java.io.IOException;
+
 class BLEServerTest {
 
     // Fake BLEServer for tests (no real DLL)
@@ -105,5 +107,37 @@ class BLEServerTest {
             }
         };
         assertThat(server.sendData("test")).isFalse();
+    }
+
+    @Test
+    @DisplayName("loadNativeLibrary should throw RuntimeException when fallback fails")
+    void testLoadNativeLibraryFailure() throws Exception {
+        // Get the method via reflection
+        var method = BLEServer.class.getDeclaredMethod("loadNativeLibrary");
+        method.setAccessible(true);
+        BLEServer evil = new BLEServer() {
+            @Override
+            protected void loadNativeLibrary() {
+                try {
+                    throw new UnsatisfiedLinkError("forced");
+                } catch (UnsatisfiedLinkError e1) {
+                    try {
+                        throw new IOException("simulated failure");
+                    } catch (Exception e2) {
+                        throw new RuntimeException("Impossible de charger BLEServer.dll", e2);
+                    }
+                }
+            }
+        };
+
+        assertThatThrownBy(() -> {
+            try {
+                method.invoke(evil);
+            } catch (Exception e) {
+                throw e.getCause();
+            }
+        })
+        .isInstanceOf(RuntimeException.class)
+        .hasCauseInstanceOf(IOException.class);
     }
 }

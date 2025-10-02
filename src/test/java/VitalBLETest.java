@@ -234,4 +234,62 @@ public class VitalBLETest {
         String config = VitalBLE.getConfiguration();
         assertThat(config).contains("Server started: false");
     }
+
+    @Test
+    @DisplayName("Should handle send() when already started")
+    void testSendWhenAlreadyStarted() {
+        when(mockServer.startServer(anyString(), anyString())).thenReturn(1);
+        when(mockServer.sendData("msg")).thenReturn(true);
+        VitalBLE.setServer(mockServer);
+
+        // First send → starts server
+        boolean first = VitalBLE.send("msg");
+        // Second send → server already started, start() skipped
+        boolean second = VitalBLE.send("msg");
+
+        assertThat(first).isTrue();
+        assertThat(second).isTrue();
+        verify(mockServer, times(1)).startServer(anyString(), anyString());
+        verify(mockServer, times(2)).sendData("msg");
+    }
+
+    @Test
+    @DisplayName("send() should return false when server is null")
+    void testSendWithNullServerReference() {
+        VitalBLE.reset();
+        // Force server null
+        VitalBLE.setServer(null);
+
+        boolean result = VitalBLE.send("data");
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    @DisplayName("send() should return false when data is null")
+    void testSendNullData() {
+        when(mockServer.startServer(anyString(), anyString())).thenReturn(1);
+        VitalBLE.setServer(mockServer);
+
+        boolean result = VitalBLE.send(null);
+        assertThat(result).isFalse();
+        verify(mockServer, times(1)).startServer(anyString(), anyString());
+        verify(mockServer, never()).sendData(anyString());
+    }
+
+    @Test
+    @DisplayName("start() should skip when server is null")
+    void testStartWithNullServer() throws Exception {
+        VitalBLE.reset();
+        // force server null
+        VitalBLE.setServer(null);
+
+        // Use reflection to call private start()
+        var startMethod = VitalBLE.class.getDeclaredMethod("start");
+        startMethod.setAccessible(true);
+        startMethod.invoke(null); // static method, invoke with null
+
+        // No exception should occur, isStarted remains false
+        String config = VitalBLE.getConfiguration();
+        assertThat(config).contains("Server started: false");
+    }
 }

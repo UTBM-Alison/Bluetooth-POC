@@ -10,12 +10,20 @@ import java.nio.file.*;
 public class BLEServer implements BLEServerInterface {
     
     static {
-        loadNativeLibrary();
+        new BLEServer().loadNativeLibrarySafe();
     }
     
-
+    // Instance method wrapping the loader for tests
+    protected void loadNativeLibrarySafe() {
+        try {
+            loadNativeLibrary();
+        } catch (RuntimeException e) {
+            // In production, just rethrow
+            throw e;
+        }
+    }
     
-    private static void loadNativeLibrary() {
+    protected void loadNativeLibrary() {
         try {
             // D'abord, essayer de charger depuis java.library.path
             System.loadLibrary("BLEServer");
@@ -30,7 +38,7 @@ public class BLEServer implements BLEServerInterface {
         }
     }
     
-    private static String extractLibraryFromResources() throws IOException {
+    private String extractLibraryFromResources() throws IOException {
         String libraryName = "BLEServer.dll";
         InputStream inputStream = BLEServer.class.getClassLoader().getResourceAsStream(libraryName);
         

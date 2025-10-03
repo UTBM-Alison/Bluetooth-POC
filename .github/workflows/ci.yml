@@ -47,12 +47,21 @@ jobs:
         run: |
           mvn -B -U clean compile test-compile
 
-      - name: Verify DLL is available
+      - name: Verify native library is available (Windows only)
+        if: matrix.os == 'windows-latest'
         run: |
           echo "Checking for BLEServer.dll..."
           dir resources\BLEServer.dll
           dir target\classes\BLEServer.dll
           echo "DLL verification complete"
+
+      - name: Verify native library is available (Linux only)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          echo "Checking for libBLEServer.so..."
+          ls -l resources/libBLEServer.so || true
+          ls -l target/classes/libBLEServer.so || true
+          echo "SO verification complete"
 
       - name: Run all tests in BLE Test Mode
         env:

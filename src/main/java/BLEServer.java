@@ -39,24 +39,53 @@ public class BLEServer implements BLEServerInterface {
     }
     
     private String extractLibraryFromResources() throws IOException {
-        String libraryName = "BLEServer.dll";
-        InputStream inputStream = BLEServer.class.getClassLoader().getResourceAsStream(libraryName);
+        // Déterminer l'OS et le nom de la bibliothèque
+        String osName = System.getProperty("os.name").toLowerCase();
+        String libraryName;
+        String fileExtension;
         
-        if (inputStream == null) {
-            throw new FileNotFoundException("BLEServer.dll non trouvé dans les resources");
+        if (osName.contains("win")) {
+            libraryName = "BLEServer.dll";
+            fileExtension = ".dll";
+        } else if (osName.contains("linux")) {
+            libraryName = "libBLEServer.so";
+            fileExtension = ".so";
+        } else {
+            throw new UnsupportedOperationException("OS non supporté: " + osName);
         }
         
-        // Créer un fichier temporaire
-        Path tempFile = Files.createTempFile("BLEServer", ".dll");
+        // Chercher d'abord dans les resources du classpath
+        InputStream inputStream = BLEServer.class.getClassLoader().getResourceAsStream(libraryName);
+        
+        // Si pas trouvé dans classpath, chercher dans le dossier resources à la racine
+        if (inputStream == null) {
+            try {
+                Path resourcesPath = Paths.get("resources", libraryName);
+                if (Files.exists(resourcesPath)) {
+                    inputStream = Files.newInputStream(resourcesPath);
+                }
+            } catch (Exception e) {
+                // Ignore et continue avec l'exception originale
+            }
+        }
+        
+        if (inputStream == null) {
+            throw new FileNotFoundException(libraryName + " non trouvé dans les resources");
+        }
+        
+        // Créer un fichier temporaire avec la bonne extension
+        Path tempFile = Files.createTempFile("BLEServer", fileExtension);
         tempFile.toFile().deleteOnExit();
         
-        // Copier la DLL vers le fichier temporaire
+        // Copier la bibliothèque vers le fichier temporaire
         try (OutputStream outputStream = Files.newOutputStream(tempFile)) {
             byte[] buffer = new byte[8192];
             int bytesRead;
             while ((bytesRead = inputStream.read(buffer)) != -1) {
                 outputStream.write(buffer, 0, bytesRead);
             }
+        } finally {
+            inputStream.close();
         }
         
         return tempFile.toAbsolutePath().toString();

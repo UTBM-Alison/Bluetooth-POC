@@ -70,7 +70,7 @@ public class BLEServer implements BLEServerInterface {
         }
         
         if (inputStream == null) {
-            throw new FileNotFoundException(libraryName + " non trouvé dans les resources");
+            throw new FileNotFoundException(libraryName + " non trouvé dans les resources ");
         }
         
         // Créer un fichier temporaire avec la bonne extension
